@@ -23,11 +23,11 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const props = defineProps(['username', 'chatWith']);
-const emit = defineEmits(['switchToPublic']);  // Emit an event to switch back to public chat
+const emit = defineEmits(['switchToPublic']);
 const messages = ref([]);
 const newMessage = ref('');
 const messageContainer = ref(null);
@@ -82,7 +82,7 @@ const sendMessage = async () => {
     if (props.chatWith) {
       const recipientRef = doc(db, 'users', props.chatWith);
       await updateDoc(recipientRef, {
-        unreadFrom: props.username,
+        unreadFrom: arrayUnion(props.username),
       });
     }
 
@@ -90,7 +90,6 @@ const sendMessage = async () => {
   }
 };
 
-// Emit an event to switch back to public chat
 const switchToPublicChat = () => {
   emit('switchToPublic');
 };

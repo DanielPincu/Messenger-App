@@ -6,7 +6,7 @@
         v-for="user in filteredUsers"
         :key="user.username"
         @click="selectUser(user)"
-        :class="{ 'has-unread-message': user.username === unreadFrom }"
+        :class="{ 'has-unread-message': unreadFrom.includes(user.username) }"
       >
         {{ user.username }}
       </li>
@@ -16,20 +16,19 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, arrayRemove } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const props = defineProps(['currentUser']);
 const users = ref([]);
-const unreadFrom = ref(''); // Track who the unread message is from
+const unreadFrom = ref([]); // Track users who have sent unread messages
 const emit = defineEmits(['selectUser']);
 
 onMounted(() => {
-  // Listen for changes in the current user's unreadFrom field
   const currentUserRef = doc(db, 'users', props.currentUser);
   onSnapshot(currentUserRef, (docSnapshot) => {
     if (docSnapshot.exists()) {
-      unreadFrom.value = docSnapshot.data().unreadFrom || '';
+      unreadFrom.value = docSnapshot.data().unreadFrom || [];
     }
   });
 
@@ -46,13 +45,12 @@ const filteredUsers = computed(() => {
 const selectUser = async (user) => {
   emit('selectUser', user.username);
 
-  if (unreadFrom.value === user.username) {
-    // Reset the unreadFrom field if the user is selected
+  if (unreadFrom.value.includes(user.username)) {
     const currentUserRef = doc(db, 'users', props.currentUser);
     await updateDoc(currentUserRef, {
-      unreadFrom: '', // Clear the notification
+      unreadFrom: arrayRemove(user.username),
     });
-    unreadFrom.value = '';
+    unreadFrom.value = unreadFrom.value.filter(u => u !== user.username);
   }
 };
 </script>
