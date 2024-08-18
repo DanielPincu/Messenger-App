@@ -1,24 +1,9 @@
 <template>
-  <v-container fluid fill-height class="d-flex align-center justify-center">
-    <v-card class="pa-8" width="100%" max-width="500">
-      <v-card-title class="justify-center">
-        <h2>Login</h2>
-      </v-card-title>
-
-      <v-card-text>
-        <v-text-field
-          v-model="username"
-          label="Enter your username"
-          outlined
-          prepend-inner-icon="mdi-account"
-        ></v-text-field>
-      </v-card-text>
-
-      <v-card-actions class="justify-center">
-        <v-btn color="primary" @click="login" block>Login</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-container>
+  <div class="login-container">
+    <h2>Login</h2>
+    <input v-model="username" placeholder="Enter your username" />
+    <button @click="login">Login</button>
+  </div>
 </template>
 
 <script setup>
@@ -45,3 +30,25 @@ const login = async () => {
   }
 };
 </script>
+
+<style scoped>
+.login-container {
+  max-width: 300px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #42b983;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+</style>
