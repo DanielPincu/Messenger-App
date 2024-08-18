@@ -16,6 +16,9 @@ const emit = defineEmits(['login']);
 
 const login = async () => {
   if (username.value.trim()) {
+    const randomNum = Math.floor(Math.random() * 1000); // Generates a random number between 0 and 999
+    username.value = `${username.value}${randomNum.toString().padStart(3, '0')}`; // Modifies username to include the random number
+
     const userRef = doc(db, 'users', username.value);
     await setDoc(userRef, {
       username: username.value,
