@@ -50,7 +50,7 @@ const startInactivityTimer = () => {
   clearInactivityTimer();
   inactivityTimer = setTimeout(() => {
     startCountdown();
-  }, 9000);
+  }, 90000000);
 };
 
 const startCountdown = () => {
