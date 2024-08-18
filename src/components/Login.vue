@@ -2,7 +2,7 @@
   <div class="login-container">
     <h2>Login</h2>
     <input v-model="username" placeholder="Enter your username" />
-    <button class="text-blue-500" @click="login">Login</button>
+    <button @click="login">Login</button>
   </div>
 </template>
 

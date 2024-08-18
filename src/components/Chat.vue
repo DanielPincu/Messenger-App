@@ -1,22 +1,48 @@
 <template>
-  <div class="chat-container">
-    <h2 v-if="chatWith">Chatting privately with {{ chatWith }}</h2>
-    <h2 v-else>Public Chat Room</h2>
+  <div class="flex flex-col max-w-2xl mx-auto mt-10 bg-white shadow-xl rounded-lg overflow-hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 bg-gray-800 text-white">
+      <h2 class="text-xl font-bold" v-if="chatWith">Chat with {{ chatWith }}</h2>
+      <h2 class="text-xl font-bold" v-else>Public Chat Room</h2>
+      <button
+        v-if="chatWith"
+        @click="switchToPublicChat"
+        class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-lg transition ease-in-out duration-200"
+      >
+        Return to Public Chat
+      </button>
+    </div>
 
-    <!-- Return to Public Chat Button -->
-    <button v-if="chatWith" @click="switchToPublicChat" class="public-chat-button">
-      Return to Public Chat
-    </button>
-
-    <div class="messages" ref="messageContainer">
-      <div v-for="message in messages" :key="message.id">
-        <strong>{{ message.sender }}:</strong> {{ message.text }}
+    <!-- Messages -->
+    <div class="flex-1 p-6 space-y-4 overflow-y-auto bg-gray-50" ref="messageContainer" style="max-height: 500px;">
+      <div v-for="message in messages" :key="message.id" class="flex">
+        <div
+          :class="{
+            'ml-auto bg-indigo-600 text-white': message.sender === username,
+            'mr-auto bg-gray-300 text-gray-800': message.sender !== username
+          }"
+          class="max-w-xs p-3 rounded-lg shadow-md transition transform hover:scale-105"
+        >
+          <strong class="block font-semibold">{{ message.sender }}:</strong>
+          <p>{{ message.text }}</p>
+        </div>
       </div>
     </div>
 
-    <div class="message-input">
-      <input v-model="newMessage" placeholder="Type a message..." />
-      <button @click="sendMessage">Send</button>
+    <!-- Input -->
+    <div class="flex items-center p-4 bg-gray-200">
+      <input
+        v-model="newMessage"
+        @keyup.enter="sendMessage"
+        placeholder="Type a message..."
+        class="flex-1 px-4 py-2 mr-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ease-in-out duration-200"
+      />
+      <button
+        @click="sendMessage"
+        class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-semibold rounded-full shadow-lg transition ease-in-out duration-200"
+      >
+        Send
+      </button>
     </div>
   </div>
 </template>
@@ -95,47 +121,22 @@ const switchToPublicChat = () => {
 };
 </script>
 
-<style scoped>
-.chat-container {
-  max-width: 600px;
-  margin: 50px auto;
+<style>
+/* Custom scrollbar for modern look */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.public-chat-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-.public-chat-button:hover {
-  background-color: #358a68;
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
-.messages {
-  height: 400px;
-  overflow-y: scroll;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-
-.message-input {
-  display: flex;
-}
-
-input {
-  flex: 1;
-  padding: 10px;
-}
-
-button {
-  padding: 10px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  cursor: pointer;
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>
