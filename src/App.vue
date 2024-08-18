@@ -1,16 +1,33 @@
 <template>
-  <div id="app">
-    <Login v-if="!username" @login="handleLogin" />
+  <div id="app" class="min-h-screen bg-gray-100">
+    <div v-if="!username" class="flex items-center justify-center h-screen">
+      <Login @login="handleLogin" />
+    </div>
     <div v-else>
-      <div class="header">
-        <h2>Welcome, {{ username }}</h2>
-        <div class="logout-section">
-          <button @click="logout">Logout <span v-if="countdown > 0" class="countdown">{{ countdown }}</span></button>
-          
+      <div class="header bg-white shadow-md p-4 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-gray-800">Welcome, {{ username }}</h2>
+        <div class="logout-section flex items-center space-x-4">
+          <button 
+            @click="logout" 
+            class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
+          >
+            Logout <span v-if="countdown > 0" class="countdown text-sm font-semibold ml-2">{{ countdown }}</span>
+          </button>
         </div>
       </div>
-      <UserList :currentUser="username" @selectUser="selectUser" />
-      <Chat :username="username" :chatWith="chatWith" @switchToPublic="switchToPublic" />
+      <div class="flex">
+        <UserList 
+          :currentUser="username" 
+          @selectUser="selectUser" 
+          class="w-1/4 bg-white p-4 border-r border-gray-300"
+        />
+        <Chat 
+          :username="username" 
+          :chatWith="chatWith" 
+          @switchToPublic="switchToPublic" 
+          class="w-3/4 p-4"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -33,19 +50,19 @@ const startInactivityTimer = () => {
   clearInactivityTimer();
   inactivityTimer = setTimeout(() => {
     startCountdown();
-  }, 9000);  // Wait for 10 seconds before starting the countdown
+  }, 9000);
 };
 
 const startCountdown = () => {
-  countdown.value = 9;  // Set countdown to 10 seconds
+  countdown.value = 9;
   countdownTimer = setInterval(() => {
     if (countdown.value > 0) {
       countdown.value -= 1;
     } else {
       clearInterval(countdownTimer);
-      logout();  // Logout when countdown reaches 0
+      logout();
     }
-  }, 900);  // Decrease countdown every second
+  }, 900);
 };
 
 const resetInactivityTimer = () => {
@@ -78,7 +95,7 @@ const selectUser = (user) => {
 };
 
 const switchToPublic = () => {
-  chatWith.value = null;  // Switch back to public chat
+  chatWith.value = null;
   resetInactivityTimer();
 };
 
@@ -96,7 +113,6 @@ const logout = async () => {
   if (username.value) {
     console.log('Logging out user:', username.value);
 
-    // Update user status to offline
     await updateUserStatus(username.value);
 
     localStorage.removeItem('username');
@@ -148,26 +164,10 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
-}
-
-.logout-section {
-  display: flex;
-  align-items: center;
-}
-
-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
 }
 
 button:hover {
-  background-color: #358a68;
+  background-color: #ff6b6b;
 }
 
 .countdown {
