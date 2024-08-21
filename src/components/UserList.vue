@@ -1,18 +1,21 @@
 <template>
-  <div class="user-list">
-    <h3>Online Users</h3>
+  <div class="w-3/4 md:w-72 p-5 mt-10 mx-auto bg-blue-500 rounded-xl">
+    <h3 class="text-lg font-semibold mb-4">Online Users</h3>
     <ul>
       <li
         v-for="user in filteredUsers"
         :key="user.username"
         @click="selectUser(user)"
-        :class="{ 'has-unread-message': unreadFrom.includes(user.username) }"
+        :class="[ 'p-2 bg-slate-300 mb-2 hover:bg-gray-400 duration-200 rounded-md cursor-pointer',
+          unreadFrom.includes(user.username) ? 'text-red-500 font-bold' : 'text-gray-800'
+        ]"
       >
         {{ user.username }}
       </li>
     </ul>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
@@ -55,31 +58,4 @@ const selectUser = async (user) => {
 };
 </script>
 
-<style scoped>
-.user-list {
-  max-width: 200px;
-  margin: 20px;
-}
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  padding: 8px;
-  margin: 4px 0;
-  cursor: pointer;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-}
-
-li:hover {
-  background-color: #e0e0e0;
-}
-
-.has-unread-message {
-  color: red;
-  font-weight: bold;
-}
-</style>

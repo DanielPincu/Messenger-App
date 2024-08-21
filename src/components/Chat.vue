@@ -1,27 +1,27 @@
 <template>
-  <div class="flex flex-col max-w-2xl mx-auto mt-10 bg-white shadow-xl rounded-lg overflow-hidden">
+  <div class="flex flex-col mx-auto mt-10 h-[600px] w-full bg-blue-500 shadow-xl rounded-xl overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between p-4 bg-gray-800 text-white">
+    <div class="flex items-center justify-between p-4 bg-blue-800 rounded-t-xl text-white">
       <h2 class="text-xl font-bold" v-if="chatWith">Chat with {{ chatWith }}</h2>
       <h2 class="text-xl font-bold" v-else>Public Chat Room</h2>
       <button
         v-if="chatWith"
         @click="switchToPublicChat"
-        class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-lg transition ease-in-out duration-200"
+        class="bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl transition ease-in-out duration-200 px-10"
       >
-        Return to Public Chat
+        Go back
       </button>
     </div>
 
     <!-- Messages -->
-    <div class="flex-1 p-6 space-y-4 overflow-y-auto bg-gray-50" ref="messageContainer" style="max-height: 500px;">
+    <div class="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-gray-50" ref="messageContainer">
       <div v-for="message in messages" :key="message.id" class="flex">
         <div
           :class="{
             'ml-auto bg-indigo-600 text-white': message.sender === username,
             'mr-auto bg-gray-300 text-gray-800': message.sender !== username
           }"
-          class="max-w-xs p-3 rounded-lg shadow-md transition transform hover:scale-105"
+          class="max-w-xs p-3 rounded-xl shadow-md transition transform hover:scale-105"
         >
           <strong class="block font-semibold">{{ message.sender }}:</strong>
           <p>{{ message.text }}</p>
@@ -30,12 +30,12 @@
     </div>
 
     <!-- Input -->
-    <div class="flex items-center p-4 bg-gray-200">
+    <div class="flex items-center p-4 rounded-b-xl bg-gray-200">
       <input
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Type a message..."
-        class="flex-1 px-4 py-2 mr-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ease-in-out duration-200"
+        class="flex-1 px-4 py-2 mr-2 w-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ease-in-out duration-200"
       />
       <button
         @click="sendMessage"
