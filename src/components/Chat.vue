@@ -203,6 +203,7 @@ const selectUser = (selectedUser) => {
 
 const setActiveConversation = (conversation) => {
   activeConversation.value = conversation;
+  activeTab.value = conversation;
   console.log("Set active conversation to:", conversation);
 };
 
