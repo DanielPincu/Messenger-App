@@ -110,7 +110,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import UserList from './UserList.vue';  // Import UserList component
 
@@ -188,6 +188,28 @@ const sendMessage = async () => {
       timestamp: Date.now(),
     });
 
+    // Notify the recipient if they are not active in the conversation
+    if (activeConversation.value !== 'public') {
+      const recipient = activeConversation.value;
+      const recipientDocRef = doc(db, 'users', recipient);
+
+      // Get the current data of the recipient
+      const recipientDoc = await getDoc(recipientDocRef);
+      if (recipientDoc.exists()) {
+        const recipientData = recipientDoc.data();
+        const unreadFrom = recipientData.unreadFrom ? recipientData.unreadFrom.split(',') : [];
+        
+        if (!unreadFrom.includes(props.username)) {
+          unreadFrom.push(props.username);
+        }
+
+        // Update the unreadFrom field for the recipient
+        await updateDoc(recipientDocRef, {
+          unreadFrom: unreadFrom.join(',')
+        });
+      }
+    }
+
     newMessage.value = '';
   }
 };
@@ -205,6 +227,19 @@ const setActiveConversation = (conversation) => {
   activeConversation.value = conversation;
   activeTab.value = conversation;
   console.log("Set active conversation to:", conversation);
+
+  if (conversation !== 'public' && unreadFrom.value.includes(conversation)) {
+    const index = unreadFrom.value.indexOf(conversation);
+    if (index > -1) {
+      unreadFrom.value.splice(index, 1);
+    }
+
+    // Update the user's unreadFrom field in Firebase
+    const userDocRef = doc(db, 'users', props.username);
+    updateDoc(userDocRef, {
+      unreadFrom: unreadFrom.value.join(',')
+    });
+  }
 };
 
 const closeConversation = (conversation) => {

@@ -18,7 +18,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const props = defineProps(['currentUser']);
@@ -29,7 +29,13 @@ const emit = defineEmits(['selectUser']);
 onMounted(() => {
   const q = query(collection(db, 'users'), where('online', '==', true));
   onSnapshot(q, (snapshot) => {
-    users.value = snapshot.docs.map(doc => doc.data());
+    users.value = snapshot.docs.map(doc => {
+      const data = doc.data();
+      if (data.username === props.currentUser) {
+        unreadFrom.value = data.unreadFrom ? data.unreadFrom.split(',') : [];
+      }
+      return data;
+    });
   });
 });
 
@@ -37,7 +43,21 @@ const filteredUsers = computed(() => {
   return users.value.filter(user => user.username !== props.currentUser);
 });
 
-const selectUser = (user) => {
+const selectUser = async (user) => {
+  // Clear the unread messages for this user when they open the chat
+  if (unreadFrom.value.includes(user.username)) {
+    const index = unreadFrom.value.indexOf(user.username);
+    if (index > -1) {
+      unreadFrom.value.splice(index, 1);
+    }
+
+    // Update the user's unreadFrom field in Firebase
+    const userDocRef = doc(db, 'users', props.currentUser);
+    await updateDoc(userDocRef, {
+      unreadFrom: unreadFrom.value.join(',')
+    });
+  }
+
   emit('selectUser', user.username);
 };
 </script>
