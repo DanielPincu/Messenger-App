@@ -24,7 +24,7 @@ import { db } from '../firebase';
 const props = defineProps(['currentUser']);
 const users = ref([]);
 const unreadFrom = ref([]); 
-const emit = defineEmits(['selectUser']);
+const emit = defineEmits(['selectUser', 'hasUnreadMessages']);
 
 onMounted(() => {
   const q = query(collection(db, 'users'), where('online', '==', true));
@@ -33,6 +33,7 @@ onMounted(() => {
       const data = doc.data();
       if (data.username === props.currentUser) {
         unreadFrom.value = data.unreadFrom ? data.unreadFrom.split(',') : [];
+        emit('hasUnreadMessages', unreadFrom.value.length > 0); // Emit event when there are unread messages
       }
       return data;
     });

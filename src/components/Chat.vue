@@ -43,7 +43,7 @@
       </button>
       <button
         @click="activeTab = 'users'"
-        :class="{ 'font-bold bg-white': activeTab === 'users' }"
+        :class="{ 'font-bold bg-white': activeTab === 'users', 'text-red-500': hasUnreadMessages }"
         class="flex-1 text-center p-2"
       >
         Online Users
@@ -110,7 +110,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import UserList from './UserList.vue';  // Import UserList component
 
@@ -123,6 +123,7 @@ const unsubscribe = ref(null);
 const activeTab = ref('public');  // Ensure the public chat is the default active tab
 const activeConversation = ref('public');  // Manage the currently active conversation
 const conversations = ref([]);  // Track all active conversations (tabs)
+const hasUnreadMessages = ref(false); // Track if there are unread messages
 
 // Initialize conversations from localStorage on mount
 onMounted(() => {
@@ -131,6 +132,7 @@ onMounted(() => {
   activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];
   activeTab.value = activeConversation.value;
   fetchMessages(activeConversation.value);
+  monitorUnreadMessages(); // Start monitoring unread messages
 });
 
 const saveConversations = () => {
@@ -227,19 +229,6 @@ const setActiveConversation = (conversation) => {
   activeConversation.value = conversation;
   activeTab.value = conversation;
   console.log("Set active conversation to:", conversation);
-
-  if (conversation !== 'public' && unreadFrom.value.includes(conversation)) {
-    const index = unreadFrom.value.indexOf(conversation);
-    if (index > -1) {
-      unreadFrom.value.splice(index, 1);
-    }
-
-    // Update the user's unreadFrom field in Firebase
-    const userDocRef = doc(db, 'users', props.username);
-    updateDoc(userDocRef, {
-      unreadFrom: unreadFrom.value.join(',')
-    });
-  }
 };
 
 const closeConversation = (conversation) => {
@@ -249,6 +238,20 @@ const closeConversation = (conversation) => {
   }
   console.log("Closed conversation:", conversation);
   console.log("Conversations array after closing:", conversations.value);
+};
+
+// Monitor unread messages for the current user
+const monitorUnreadMessages = () => {
+  const q = query(collection(db, 'users'), where('online', '==', true));
+  onSnapshot(q, (snapshot) => {
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.username === props.username) {
+        const unreadFrom = data.unreadFrom ? data.unreadFrom.split(',') : [];
+        hasUnreadMessages.value = unreadFrom.length > 0;
+      }
+    });
+  });
 };
 </script>
 
