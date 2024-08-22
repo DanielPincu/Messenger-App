@@ -1,6 +1,6 @@
 <template>
-  <div class="w-3/4 md:w-72 p-5 mt-10 mx-auto bg-blue-500 rounded-xl">
-    <h3 class="text-lg font-semibold mb-4">Online Users</h3>
+  <div class="w-full md:w-72 p-5 bg-blue-500 rounded-xl">
+    <h3 class="text-lg font-semibold mb-4 text-white">Online Users</h3>
     <ul>
       <li
         v-for="user in filteredUsers"
@@ -16,25 +16,17 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, query, where, onSnapshot, doc, updateDoc, arrayRemove } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const props = defineProps(['currentUser']);
 const users = ref([]);
-const unreadFrom = ref([]); // Track users who have sent unread messages
+const unreadFrom = ref([]); 
 const emit = defineEmits(['selectUser']);
 
 onMounted(() => {
-  const currentUserRef = doc(db, 'users', props.currentUser);
-  onSnapshot(currentUserRef, (docSnapshot) => {
-    if (docSnapshot.exists()) {
-      unreadFrom.value = docSnapshot.data().unreadFrom || [];
-    }
-  });
-
   const q = query(collection(db, 'users'), where('online', '==', true));
   onSnapshot(q, (snapshot) => {
     users.value = snapshot.docs.map(doc => doc.data());
@@ -45,17 +37,11 @@ const filteredUsers = computed(() => {
   return users.value.filter(user => user.username !== props.currentUser);
 });
 
-const selectUser = async (user) => {
+const selectUser = (user) => {
   emit('selectUser', user.username);
-
-  if (unreadFrom.value.includes(user.username)) {
-    const currentUserRef = doc(db, 'users', props.currentUser);
-    await updateDoc(currentUserRef, {
-      unreadFrom: arrayRemove(user.username),
-    });
-    unreadFrom.value = unreadFrom.value.filter(u => u !== user.username);
-  }
 };
 </script>
 
-
+<style scoped>
+/* Add any necessary styles here */
+</style>
