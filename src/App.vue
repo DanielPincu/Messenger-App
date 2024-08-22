@@ -16,11 +16,11 @@
         </div>
       </div>
       <div class="md:flex gap-4">
-        <UserList 
+        <!-- <UserList 
           :currentUser="username" 
           @selectUser="selectUser" 
           class="bg-white p-4 border-r border-gray-300"
-        />
+        /> -->
         <Chat 
           :username="username" 
           :chatWith="chatWith" 
