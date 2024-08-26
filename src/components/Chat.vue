@@ -51,7 +51,7 @@
     </div>
 
     <!-- Main Content Based on Active Tab -->
-    <div class="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-gray-50" ref="messageContainer">
+    <div class="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-gray-50 message-container" ref="messageContainer">
       <!-- Public Chat Messages -->
       <div v-if="activeTab === 'public'">
         <div v-for="message in messages" :key="message.id" class="flex">
@@ -109,54 +109,57 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import UserList from './UserList.vue';  // Import UserList component
 
-const props = defineProps(['username']);
-const messages = ref([]);
-const newMessage = ref('');
-const messageContainer = ref(null);
-const unsubscribe = ref(null);
+const props = defineProps(['username']);  // Receive username as a prop
+const messages = ref([]);  // Reactive variable to store messages
+const newMessage = ref('');  // Reactive variable to hold the new message input
+const messageContainer = ref(null);  // Reference to the message container for auto-scroll
+const unsubscribe = ref(null);  // Store the unsubscribe function for Firestore listener
 
-const activeTab = ref('public');  // Ensure the public chat is the default active tab
-const activeConversation = ref('public');  // Manage the currently active conversation
-const conversations = ref([]);  // Track all active conversations (tabs)
+const activeTab = ref('public');  // Default active tab is the public chat
+const activeConversation = ref('public');  // Default active conversation is the public chat
+const conversations = ref([]);  // Store all active conversations (including public chat)
 const hasUnreadMessages = ref(false); // Track if there are unread messages
 
-// Initialize conversations from localStorage on mount
+// Initialize conversations from localStorage when the component mounts
 onMounted(() => {
   const savedConversations = JSON.parse(localStorage.getItem('conversations')) || ['public'];
-  conversations.value = savedConversations;
-  activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];
-  activeTab.value = activeConversation.value;
-  fetchMessages(activeConversation.value);
+  conversations.value = savedConversations;  // Load saved conversations
+  activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];  // Set active conversation
+  activeTab.value = activeConversation.value;  // Set active tab to match the conversation
+  fetchMessages(activeConversation.value);  // Fetch messages for the active conversation
   monitorUnreadMessages(); // Start monitoring unread messages
 });
 
+// Save conversations to localStorage whenever they change
 const saveConversations = () => {
   localStorage.setItem('conversations', JSON.stringify(conversations.value));
 };
 
+// Generate the chat room ID based on whether it's public or private
 const getChatRoomId = (conversation) => {
   return conversation === 'public'
     ? 'public_chat'
     : `private_${[props.username, conversation].sort().join('_')}`;
 };
 
+// Unsubscribe from the Firestore listener if it's active
 const unsubscribeFromMessages = () => {
   if (unsubscribe.value) {
-    unsubscribe.value();
-    unsubscribe.value = null;
+    unsubscribe.value();  // Unsubscribe from Firestore
+    unsubscribe.value = null;  // Clear the unsubscribe function
   }
 };
 
+// Fetch messages from Firestore for the active conversation
 const fetchMessages = (conversation) => {
-  console.log("Fetching messages for conversation:", conversation);
-  unsubscribeFromMessages();
-  messages.value = [];
-  const chatRoomId = getChatRoomId(conversation);
+  unsubscribeFromMessages();  // Unsubscribe from any previous listeners
+  messages.value = [];  // Clear current messages
+  const chatRoomId = getChatRoomId(conversation);  // Get chat room ID
   const messagesRef = collection(db, chatRoomId);
 
   unsubscribe.value = onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
@@ -165,23 +168,23 @@ const fetchMessages = (conversation) => {
       ...doc.data(),
     }));
 
-    if (messageContainer.value) {
-      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
-    }
+    scrollToBottom();  // Scroll to the latest message
   });
 };
 
+// Watch for changes in conversations and save them
 watch(conversations, saveConversations, { deep: true });
 
+// Watch for changes in the active conversation and fetch messages
 watch(activeConversation, (newConversation) => {
-  console.log("Active conversation changed to:", newConversation);
-  fetchMessages(newConversation);
-  activeTab.value = newConversation === 'public' ? 'public' : newConversation;
+  fetchMessages(newConversation);  // Fetch messages for the new active conversation
+  activeTab.value = newConversation === 'public' ? 'public' : newConversation;  // Update the active tab
 });
 
+// Send a new message to Firestore
 const sendMessage = async () => {
   if (newMessage.value.trim()) {
-    const chatRoomId = getChatRoomId(activeConversation.value);
+    const chatRoomId = getChatRoomId(activeConversation.value);  // Get chat room ID
     const messagesRef = collection(db, chatRoomId);
 
     await addDoc(messagesRef, {
@@ -190,54 +193,60 @@ const sendMessage = async () => {
       timestamp: Date.now(),
     });
 
-    // Notify the recipient if they are not active in the conversation
+    // Notify the recipient if it's a private message
     if (activeConversation.value !== 'public') {
       const recipient = activeConversation.value;
       const recipientDocRef = doc(db, 'users', recipient);
 
-      // Get the current data of the recipient
       const recipientDoc = await getDoc(recipientDocRef);
       if (recipientDoc.exists()) {
         const recipientData = recipientDoc.data();
         const unreadFrom = recipientData.unreadFrom ? recipientData.unreadFrom.split(',') : [];
         
+        // Add sender to recipient's unread messages list if not already there
         if (!unreadFrom.includes(props.username)) {
           unreadFrom.push(props.username);
         }
 
-        // Update the unreadFrom field for the recipient
         await updateDoc(recipientDocRef, {
           unreadFrom: unreadFrom.join(',')
         });
       }
     }
 
-    newMessage.value = '';
+    newMessage.value = '';  // Clear the input after sending
+    scrollToBottom();  // Scroll to the bottom after sending a message
   }
 };
 
+// Select a user to start a private chat
 const selectUser = (selectedUser) => {
-  console.log("Selected user:", selectedUser);
   if (!conversations.value.includes(selectedUser)) {
-    conversations.value.push(selectedUser);  // Add new conversation if it doesn't exist
-    console.log("New conversations array:", conversations.value);
+    conversations.value.push(selectedUser);  // Add the user to the conversations list
   }
-  setActiveConversation(selectedUser);  // Set the newly selected user as the active conversation
+  setActiveConversation(selectedUser);  // Set the active conversation to the selected user
 };
 
+// Set the active conversation and tab
 const setActiveConversation = (conversation) => {
   activeConversation.value = conversation;
   activeTab.value = conversation;
-  console.log("Set active conversation to:", conversation);
 };
 
+// Close a conversation and switch to the public chat
 const closeConversation = (conversation) => {
-  conversations.value = conversations.value.filter(c => c !== conversation);
+  conversations.value = conversations.value.filter(c => c !== conversation);  // Remove the conversation
   if (activeConversation.value === conversation) {
-    setActiveConversation('public');
+    setActiveConversation('public');  // Switch to public chat if the closed conversation was active
   }
-  console.log("Closed conversation:", conversation);
-  console.log("Conversations array after closing:", conversations.value);
+};
+
+// Scroll to the bottom of the message container
+const scrollToBottom = async () => {
+  await nextTick();  // Wait until the DOM is updated
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+  }
 };
 
 // Monitor unread messages for the current user
@@ -256,7 +265,7 @@ const monitorUnreadMessages = () => {
 </script>
 
 <style>
-/* Custom scrollbar for modern look */
+
 ::-webkit-scrollbar {
   width: 8px;
 }

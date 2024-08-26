@@ -12,24 +12,26 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const username = ref('');
-const emit = defineEmits(['login']);
+const emit = defineEmits(['login']);  // Define an event emitter for login
 
+// Handle the login process
 const login = async () => {
   if (username.value.trim()) {
-    const randomNum = Math.floor(Math.random() * 1000); // Generates a random number between 0 and 999
-    username.value = `${username.value}${randomNum.toString().padStart(3, '0')}`; // Modifies username to include the random number
+    const randomNum = Math.floor(Math.random() * 1000);  // Generate a random number between 0 and 999
+    username.value = `${username.value}${randomNum.toString().padStart(3, '0')}`;  // Append the random number to the username
 
-    const userRef = doc(db, 'users', username.value);
+    const userRef = doc(db, 'users', username.value);  // Reference to the user document in Firestore
     await setDoc(userRef, {
       username: username.value,
       online: true,
-      unreadFrom: '', // Initialize with no unread messages
+      unreadFrom: '',  // Initialize the unreadFrom field
     });
 
-    emit('login', username.value);
+    emit('login', username.value);  // Emit the login event with the username
   }
 };
 </script>
+
 
 <style scoped>
 .login-container {

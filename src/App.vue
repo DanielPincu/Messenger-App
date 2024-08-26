@@ -11,7 +11,7 @@
             @click="logout" 
             class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
           >
-            Logout <span v-if="countdown > 0" class="countdown text-sm font-semibold ml-2">{{ countdown }}</span>
+            Logout
           </button>
         </div>
       </div>
@@ -33,129 +33,57 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import Login from './components/Login.vue';
 import Chat from './components/Chat.vue';
-import UserList from './components/UserList.vue';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-const username = ref('');
-const chatWith = ref(null);
-let inactivityTimer = null;
-let countdownTimer = null;
-const countdown = ref(0);
+const username = ref('');  // Store the logged-in username
+const chatWith = ref(null);  // Track the current user being chatted with
 
-const startInactivityTimer = () => {
-  clearInactivityTimer();
-  inactivityTimer = setTimeout(() => {
-    startCountdown();
-  }, 900000);
-};
-
-const startCountdown = () => {
-  countdown.value = 9;
-  countdownTimer = setInterval(() => {
-    if (countdown.value > 0) {
-      countdown.value -= 1;
-    } else {
-      clearInterval(countdownTimer);
-      logout();
-    }
-  }, 90000);
-};
-
-const resetInactivityTimer = () => {
-  clearInactivityTimer();
-  countdown.value = 0;
-  startInactivityTimer();
-};
-
-const clearInactivityTimer = () => {
-  if (inactivityTimer) {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = null;
-  }
-  if (countdownTimer) {
-    clearInterval(countdownTimer);
-    countdownTimer = null;
-  }
-};
-
+// Handle the login process
 const handleLogin = (user) => {
-  username.value = user;
-  localStorage.setItem('username', user);
-  startInactivityTimer();
-  addInactivityListeners();
+  username.value = user;  // Set the logged-in username
+  localStorage.setItem('username', user);  // Save the username in localStorage
 };
 
+// Select a user to chat with
 const selectUser = (user) => {
-  chatWith.value = user;
-  resetInactivityTimer();
+  chatWith.value = user;  // Set the user being chatted with
 };
 
+// Switch back to the public chat
 const switchToPublic = () => {
-  chatWith.value = null;
-  resetInactivityTimer();
+  chatWith.value = null;  // Set chatWith to null for public chat
 };
 
+// Update the user's online status to offline in Firestore
 const updateUserStatus = async (user) => {
   try {
     const userRef = doc(db, 'users', user);
-    await updateDoc(userRef, { online: false });
-    console.log(`User ${user} status updated to offline.`);
+    await updateDoc(userRef, { online: false });  // Set the user's status to offline
   } catch (error) {
     console.error('Error updating user status:', error);
   }
 };
 
+// Log the user out
 const logout = async () => {
   if (username.value) {
-    console.log('Logging out user:', username.value);
-
-    await updateUserStatus(username.value);
-
-    localStorage.removeItem('username');
-    username.value = '';
-    chatWith.value = null;
-
-    clearInactivityTimer();
-    removeInactivityListeners();
-
-    console.log('Logout successful');
+    await updateUserStatus(username.value);  // Update the user's status to offline
+    localStorage.removeItem('username');  // Remove the username from localStorage
+    username.value = '';  // Clear the username
+    chatWith.value = null;  // Clear the chatWith value
   }
 };
 
-const handleUserActivity = () => {
-  resetInactivityTimer();
-};
-
-const addInactivityListeners = () => {
-  window.addEventListener('mousemove', handleUserActivity);
-  window.addEventListener('keydown', handleUserActivity);
-  window.addEventListener('click', handleUserActivity);
-  window.addEventListener('scroll', handleUserActivity);
-};
-
-const removeInactivityListeners = () => {
-  window.removeEventListener('mousemove', handleUserActivity);
-  window.removeEventListener('keydown', handleUserActivity);
-  window.removeEventListener('click', handleUserActivity);
-  window.removeEventListener('scroll', handleUserActivity);
-};
-
+// Check if the user is already logged in when the component mounts
 onMounted(() => {
   const storedUsername = localStorage.getItem('username');
   if (storedUsername) {
-    username.value = storedUsername;
-    startInactivityTimer();
-    addInactivityListeners();
+    username.value = storedUsername;  // Set the stored username
   }
-});
-
-onUnmounted(() => {
-  clearInactivityTimer();
-  removeInactivityListeners();
 });
 </script>
 
@@ -168,11 +96,5 @@ onUnmounted(() => {
 
 button:hover {
   background-color: #ff6b6b;
-}
-
-.countdown {
-  margin-left: 10px;
-  font-weight: bold;
-  color: rgb(243, 233, 233);
 }
 </style>
