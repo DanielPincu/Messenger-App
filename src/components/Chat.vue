@@ -1,8 +1,7 @@
 <template>
-  <div class="flex flex-col container mx-auto mt-10 h-[600px] w-full bg-blue-500 shadow-xl rounded-xl overflow-hidden">
-    
+  <div class="flex flex-col container mx-auto mt-10 h-[550px] md:h-[600px] w-full bg-blue-400 shadow-xl border-blue-500 border-t-2 border-l-2 rounded-xl overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between p-4 bg-blue-800 rounded-t-xl text-white">
+    <div class="flex items-center justify-between p-4 bg-blue-500 border-blue-600 border-t-2 border-l-2 rounded-t-xl text-white">
       <h2 class="text-xl font-bold">
         <template v-if="activeTab === 'users'">
           Online Users
@@ -17,17 +16,17 @@
       <button
         v-if="activeTab !== 'users' && activeConversation !== 'public'"
         @click="closeConversation(activeConversation)"
-        class="bg-red-500 hover:bg-red-400 text-white rounded-xl transition ease-in-out duration-200 px-4 py-1"
+        class="bg-red-500 hover:bg-red-400 text-white rounded-xl transition ease-in-out duration-200 px-4"
       >
         Close Chat
       </button>
     </div>
 
     <!-- Tabs -->
-    <div class="tabs flex p-2 bg-gray-200">
+    <div class="tabs flex p-2 bg-blue-200">
       <button
         @click="setActiveConversation('public')"
-        :class="{ 'font-bold bg-white': activeTab === 'public' }"
+        :class="{ 'font-bold bg-blue-400': activeTab === 'public' }"
         class="flex-1 text-center p-2"
       >
         Public Chat
@@ -36,14 +35,14 @@
         v-for="conversation in conversations.filter(c => c !== 'public')"
         :key="conversation"
         @click="setActiveConversation(conversation)"
-        :class="{ 'font-bold bg-white': activeTab === conversation }"
+        :class="{ 'font-bold bg-blue-400': activeTab === conversation }"
         class="flex-1 text-center p-2"
       >
         Chat with {{ conversation }}
       </button>
       <button
         @click="activeTab = 'users'"
-        :class="{ 'font-bold bg-white': activeTab === 'users', 'text-red-500': hasUnreadMessages }"
+        :class="{ 'font-bold bg-blue-400': activeTab === 'users', 'text-red-500': hasUnreadMessages }"
         class="flex-1 text-center p-2"
       >
         Online Users
@@ -51,10 +50,10 @@
     </div>
 
     <!-- Main Content Based on Active Tab -->
-    <div class="flex-1 p-6 space-y-4 overflow-y-auto max-h-[500px] bg-gray-50 message-container" ref="messageContainer">
+    <div class="flex-1 p-6 space-y-4 overflow-y-auto max-h-full md:max-h-[350px] bg-blue-100 border-blue-200 border-t-2 border-l-2 message-container" ref="messageContainer">
       <!-- Public Chat Messages -->
       <div v-if="activeTab === 'public'">
-        <div v-for="message in messages" :key="message.id" class="flex">
+        <div v-for="message in messages" :key="message.id" class="flex flex-col mb-4">
           <div
             :class="{
               'ml-auto bg-indigo-600 text-white': message.sender === username,
@@ -65,21 +64,31 @@
             <strong class="block font-semibold">{{ message.sender }}:</strong>
             <p>{{ message.text }}</p>
           </div>
+          <!-- Edit and Delete buttons -->
+          <div v-if="message.sender === username" class="flex justify-end">
+            <button @click="startEditing(message)" class="text-blue-500 hover:text-blue-700 px-2">Edit</button>
+            <button @click="deleteMessage(message.id)" class="text-red-500 hover:text-red-700">Delete</button>
+          </div>
         </div>
       </div>
 
       <!-- Private Chat Messages -->
       <div v-else-if="activeTab !== 'users'">
-        <div v-for="message in messages" :key="message.id" class="flex">
+        <div v-for="message in messages" :key="message.id" class="flex flex-col mb-4">
           <div
             :class="{
               'ml-auto bg-indigo-600 text-white': message.sender === username,
               'mr-auto bg-gray-300 text-gray-800': message.sender !== username
             }"
-            class="max-w-xs p-3 rounded-xl shadow-md transition transform hover:scale-105"
+            class="max-w-xs p-3 rounded-xl shadow-md"
           >
             <strong class="block font-semibold">{{ message.sender }}:</strong>
             <p>{{ message.text }}</p>
+          </div>
+          <!-- Edit and Delete buttons -->
+          <div v-if="message.sender === username" class="flex justify-end">
+            <button @click="startEditing(message)" class="text-blue-500 hover:text-blue-700 px-2">Edit</button>
+            <button @click="deleteMessage(message.id)" class="text-red-500 hover:text-red-700">Delete</button>
           </div>
         </div>
       </div>
@@ -93,10 +102,11 @@
     <!-- Input for Sending Messages (only in Chat Tab) -->
     <div v-if="activeTab !== 'users'" class="flex items-center p-4 rounded-b-xl bg-gray-200">
       <input
+        ref="messageInput"
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Type a message..."
-        class="flex-1 px-4 py-2 mr-2 w-10 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ease-in-out duration-200"
+        class="flex-1 px-4 py-2 mr-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ease-in-out duration-200"
       />
       <button
         @click="sendMessage"
@@ -105,61 +115,83 @@
         Send
       </button>
     </div>
+
+    <!-- Edit Message Modal -->
+    <div v-if="isEditing" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white p-4 rounded-xl shadow-lg">
+        <h3 class="text-lg font-semibold mb-2">Edit Message</h3>
+        <textarea
+          v-model="editMessageText"
+          @keyup.enter="updateMessage"
+          class="w-full p-2 border border-gray-300 rounded-md"
+          rows="4" 
+        ></textarea>
+        <div class="mt-2 flex justify-end">
+          <button @click="updateMessage" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Update</button>
+          <button @click="cancelEdit" class="ml-2 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue';
-import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, where } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import UserList from './UserList.vue';  // Import UserList component
+import UserList from './UserList.vue';
 
-const props = defineProps(['username']);  // Receive username as a prop
-const messages = ref([]);  // Reactive variable to store messages
-const newMessage = ref('');  // Reactive variable to hold the new message input
-const messageContainer = ref(null);  // Reference to the message container for auto-scroll
-const unsubscribe = ref(null);  // Store the unsubscribe function for Firestore listener
+const props = defineProps(['username']);
+const messages = ref([]);
+const newMessage = ref('');
+const messageContainer = ref(null);
+const messageInput = ref(null); // Add this line
+const unsubscribe = ref(null);
 
-const activeTab = ref('public');  // Default active tab is the public chat
-const activeConversation = ref('public');  // Default active conversation is the public chat
-const conversations = ref([]);  // Store all active conversations (including public chat)
-const hasUnreadMessages = ref(false); // Track if there are unread messages
+const activeTab = ref('public');
+const activeConversation = ref('public');
+const conversations = ref([]);
+const hasUnreadMessages = ref(false);
 
-// Initialize conversations from localStorage when the component mounts
+const isEditing = ref(false);
+const editMessageId = ref(null);
+const editMessageText = ref('');
+
+// Initialize conversations and messages
 onMounted(() => {
   const savedConversations = JSON.parse(localStorage.getItem('conversations')) || ['public'];
-  conversations.value = savedConversations;  // Load saved conversations
-  activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];  // Set active conversation
-  activeTab.value = activeConversation.value;  // Set active tab to match the conversation
-  fetchMessages(activeConversation.value);  // Fetch messages for the active conversation
-  monitorUnreadMessages(); // Start monitoring unread messages
+  conversations.value = savedConversations;
+  activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];
+  activeTab.value = activeConversation.value;
+  fetchMessages(activeConversation.value);
+  monitorUnreadMessages();
 });
 
-// Save conversations to localStorage whenever they change
+// Save conversations to localStorage
 const saveConversations = () => {
   localStorage.setItem('conversations', JSON.stringify(conversations.value));
 };
 
-// Generate the chat room ID based on whether it's public or private
+// Get chat room ID
 const getChatRoomId = (conversation) => {
   return conversation === 'public'
     ? 'public_chat'
     : `private_${[props.username, conversation].sort().join('_')}`;
 };
 
-// Unsubscribe from the Firestore listener if it's active
+// Unsubscribe from Firestore
 const unsubscribeFromMessages = () => {
   if (unsubscribe.value) {
-    unsubscribe.value();  // Unsubscribe from Firestore
-    unsubscribe.value = null;  // Clear the unsubscribe function
+    unsubscribe.value();
+    unsubscribe.value = null;
   }
 };
 
-// Fetch messages from Firestore for the active conversation
+// Fetch messages from Firestore
 const fetchMessages = (conversation) => {
-  unsubscribeFromMessages();  // Unsubscribe from any previous listeners
-  messages.value = [];  // Clear current messages
-  const chatRoomId = getChatRoomId(conversation);  // Get chat room ID
+  unsubscribeFromMessages();
+  messages.value = [];
+  const chatRoomId = getChatRoomId(conversation);
   const messagesRef = collection(db, chatRoomId);
 
   unsubscribe.value = onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
@@ -168,23 +200,21 @@ const fetchMessages = (conversation) => {
       ...doc.data(),
     }));
 
-    scrollToBottom();  // Scroll to the latest message
+    scrollToBottom();
   });
 };
 
-// Watch for changes in conversations and save them
+// Watch changes in conversations
 watch(conversations, saveConversations, { deep: true });
-
-// Watch for changes in the active conversation and fetch messages
 watch(activeConversation, (newConversation) => {
-  fetchMessages(newConversation);  // Fetch messages for the new active conversation
-  activeTab.value = newConversation === 'public' ? 'public' : newConversation;  // Update the active tab
+  fetchMessages(newConversation);
+  activeTab.value = newConversation === 'public' ? 'public' : newConversation;
 });
 
 // Send a new message to Firestore
 const sendMessage = async () => {
   if (newMessage.value.trim()) {
-    const chatRoomId = getChatRoomId(activeConversation.value);  // Get chat room ID
+    const chatRoomId = getChatRoomId(activeConversation.value);
     const messagesRef = collection(db, chatRoomId);
 
     await addDoc(messagesRef, {
@@ -193,7 +223,6 @@ const sendMessage = async () => {
       timestamp: Date.now(),
     });
 
-    // Notify the recipient if it's a private message
     if (activeConversation.value !== 'public') {
       const recipient = activeConversation.value;
       const recipientDocRef = doc(db, 'users', recipient);
@@ -202,8 +231,7 @@ const sendMessage = async () => {
       if (recipientDoc.exists()) {
         const recipientData = recipientDoc.data();
         const unreadFrom = recipientData.unreadFrom ? recipientData.unreadFrom.split(',') : [];
-        
-        // Add sender to recipient's unread messages list if not already there
+
         if (!unreadFrom.includes(props.username)) {
           unreadFrom.push(props.username);
         }
@@ -214,17 +242,22 @@ const sendMessage = async () => {
       }
     }
 
-    newMessage.value = '';  // Clear the input after sending
-    scrollToBottom();  // Scroll to the bottom after sending a message
+    newMessage.value = '';
+    scrollToBottom();
+
+    // Blur the input field
+    if (messageInput.value) {
+      messageInput.value.blur();
+    }
   }
 };
 
 // Select a user to start a private chat
 const selectUser = (selectedUser) => {
   if (!conversations.value.includes(selectedUser)) {
-    conversations.value.push(selectedUser);  // Add the user to the conversations list
+    conversations.value.push(selectedUser);
   }
-  setActiveConversation(selectedUser);  // Set the active conversation to the selected user
+  setActiveConversation(selectedUser);
 };
 
 // Set the active conversation and tab
@@ -233,53 +266,64 @@ const setActiveConversation = (conversation) => {
   activeTab.value = conversation;
 };
 
-// Close a conversation and switch to the public chat
+// Close a conversation
 const closeConversation = (conversation) => {
-  conversations.value = conversations.value.filter(c => c !== conversation);  // Remove the conversation
+  conversations.value = conversations.value.filter(c => c !== conversation);
   if (activeConversation.value === conversation) {
-    setActiveConversation('public');  // Switch to public chat if the closed conversation was active
+    setActiveConversation('public');
   }
 };
 
 // Scroll to the bottom of the message container
 const scrollToBottom = async () => {
-  await nextTick();  // Wait until the DOM is updated
+  await nextTick();
   if (messageContainer.value) {
     messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
   }
 };
 
-// Monitor unread messages for the current user
+// Monitor unread messages
 const monitorUnreadMessages = () => {
-  const q = query(collection(db, 'users'), where('online', '==', true));
+  const q = query(collection(db, 'users'), where('unreadFrom', 'array-contains', props.username));
   onSnapshot(q, (snapshot) => {
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.username === props.username) {
-        const unreadFrom = data.unreadFrom ? data.unreadFrom.split(',') : [];
-        hasUnreadMessages.value = unreadFrom.length > 0;
-      }
-    });
+    hasUnreadMessages.value = !snapshot.empty;
   });
 };
+
+// Start editing a message
+const startEditing = (message) => {
+  isEditing.value = true;
+  editMessageId.value = message.id;
+  editMessageText.value = message.text;
+};
+
+// Update the edited message
+const updateMessage = async () => {
+  if (editMessageText.value.trim()) {
+    const chatRoomId = getChatRoomId(activeConversation.value);
+    const messageRef = doc(db, chatRoomId, editMessageId.value);
+
+    await updateDoc(messageRef, {
+      text: editMessageText.value,
+    });
+
+    cancelEdit();
+  }
+};
+
+// Cancel editing
+const cancelEdit = () => {
+  isEditing.value = false;
+  editMessageId.value = null;
+  editMessageText.value = '';
+};
+
+// Delete a message
+const deleteMessage = async (messageId) => {
+  const chatRoomId = getChatRoomId(activeConversation.value);
+  const messageRef = doc(db, chatRoomId, messageId);
+
+  await deleteDoc(messageRef);
+};
+
 </script>
-
-<style>
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-</style>
