@@ -3,11 +3,14 @@
     
     <!-- Sidebar for Online Users -->
     <div :class="['md:flex md:flex-col md:w-64', { 'hidden': !isSidebarOpen, 'absolute top-0 left-0 h-full w-full bg-blue-400 z-50': isSidebarOpen }]">
-      <h1 class="text-center text-3xl font-bold text-white">CHATOGNITO</h1>
-      <button @click="toggleSidebar" class="md:hidden text-white">
+      <!-- <h1 class="text-center text-3xl font-bold text-white">CHATOGNITO</h1> -->
+       <img class="p-2 w-full" src="../assets/logo.png" alt="">
+      <div class="flex justify-center">
+        <button @click="toggleSidebar" class="md:hidden bg-red-500 rounded-lg px-3 ml-3 text-white">
          CLOSE
       </button>
-      <div class="flex-1 p-4 bg-blue-300 mr-0 mt-[26px] overflow-y-auto">
+      </div>
+      <div class="flex-1 p-4 bg-blue-300 mr-0 mt-[54px] overflow-y-auto">
         <UserList :currentUser="username" :currentChatUser="activeConversation" @selectUser="selectUser" @closeSidebar="toggleSidebar" />
 
       </div>
