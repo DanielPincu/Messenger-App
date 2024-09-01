@@ -3,7 +3,6 @@
     
     <!-- Sidebar for Online Users -->
     <div :class="['md:flex md:flex-col md:w-64', { 'hidden': !isSidebarOpen, 'absolute top-0 left-0 h-full w-full bg-blue-400 z-50': isSidebarOpen }]">
-      <!-- <h1 class="text-center text-3xl font-bold text-white">CHATOGNITO</h1> -->
        <img class="p-2 w-full" src="../assets/logo.png" alt="">
       <div class="flex justify-center">
         <button @click="toggleSidebar" class="md:hidden bg-red-500 rounded-lg px-3 ml-3 text-white">
@@ -21,7 +20,7 @@
       <!-- Header -->
       <div class="flex items-center justify-between p-4 bg-blue-500 border-blue-500 border-t-2 border-l-2 rounded-t-xl text-white">
         <div class="flex items-center space-x-4">
-          <button @click="toggleSidebar" class="md:hidden text-white">
+          <button @click="toggleSidebar" class="md:hidden text-white text-3xl">
             ☰
           </button>
           <h2 class="text-sm md:text-lg font-bold">
@@ -39,7 +38,7 @@
         <button
           v-if="activeTab !== 'public' && activeConversation !== 'public'"
           @click="closeConversation(activeConversation)"
-          class="bg-red-500 hover:bg-red-600 text-white rounded-md transition ease-in-out duration-200 px-2 md:px-10"
+          class="bg-red-500 hover:bg-red-600 text-white rounded-md transition ease-in-out duration-200 px-2 md:px-5"
         >
           Close Chat
         </button>
@@ -52,7 +51,7 @@
           :class="{ 'font-bold bg-blue-400 rounded-lg': activeTab === 'public' }"
           class="flex-1 text-center border-2 border-blue-500 rounded-lg p-2 mx-2"
         >
-          Public Chat
+          <span>Public <span class="hidden md:inline-block">Chat</span></span>
         </button>
         <button
           v-for="conversation in conversations.filter(c => c !== 'public')"
@@ -61,7 +60,7 @@
           :class="{ 'font-bold bg-blue-400 rounded-lg': activeTab === conversation }"
           class="flex-1 text-center border-2 border-blue-500 rounded-lg p-2 mx-2"
         >
-          Chat with {{ conversation }}
+          <span class="hidden md:inline-block">Chat with</span> {{ conversation }}
         </button>
       </div>
 

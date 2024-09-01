@@ -1,20 +1,24 @@
 <template>
-  <div class="w-full p-5 bg-blue-500 rounded-xl">
-    <h3 class="text-lg font-semibold mb-4 text-white">Online Users</h3>
-    <ul>
-      <li
-        v-for="user in filteredUsers"
-        :key="user.username"
-        @click="selectUser(user)"
-        :class="[
-          'p-2 bg-slate-300 mb-2 hover:bg-gray-400 duration-200 rounded-md cursor-pointer',
-          shouldHighlightUser(user.username) ? 'text-red-500 font-bold' : 'text-gray-800'
-        ]"
-      >
-        {{ user.username }}
-      </li>
-    </ul>
-  </div>
+ <div class="w-full p-5 bg-blue-200 rounded-xl">
+  <h3 class="text-lg font-semibold text-green-700 text-center mb-4">Online Users</h3>
+  <ul>
+    <li class="flex items-center"
+      v-for="user in filteredUsers"
+      :key="user.username"
+      @click="selectUser(user)"
+      :class="[
+        'p-2 bg-green-100 mb-2 font-bold hover:bg-green-400 duration-200 rounded-md cursor-pointer',
+        shouldHighlightUser(user.username) ? 'text-red-500' : 'text-green-900'
+      ]"
+    >
+      {{ user.username }}
+      <span class="ml-auto">
+        <i class="fas fa-paper-plane text-black"></i>
+      </span>
+    </li>
+  </ul>
+</div>
+
 </template>
 
 <script setup>
