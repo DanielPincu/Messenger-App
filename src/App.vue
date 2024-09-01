@@ -20,7 +20,7 @@
           :username="displayName" 
           :chatWith="chatWith" 
           @switchToPublic="switchToPublic" 
-          class="w-3/4 p-0 md:p-4"
+          class="w-3/4 p-4"
         />
       </div>
     </div>
