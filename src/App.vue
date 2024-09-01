@@ -114,7 +114,7 @@ onMounted(() => {
   const storedDisplayName = localStorage.getItem('displayName');
   if (storedUsername) {
     username.value = storedUsername;  // Set the stored UID or custom username
-    displayName.value = storedDisplayName || 'Anonymous';  // Set the stored display name
+    displayName.value = storedDisplayName   // Set the stored display name, || 'Anonymous';
   }
 });
 </script>
