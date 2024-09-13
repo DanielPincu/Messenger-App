@@ -1,19 +1,22 @@
 <template>
   <div class="flex flex-col md:flex-row container mx-auto mt-10 h-[550px] md:h-[650px] 2xl:h-[800px] w-full bg-blue-400 shadow-xl border-blue-500 border-t-2 border-l-2 rounded-xl overflow-hidden">
     
+
+
     <!-- Sidebar for Online Users -->
     <div :class="['md:flex md:flex-col md:w-64', { 'hidden': !isSidebarOpen, 'absolute top-0 left-0 h-full w-full bg-blue-400 z-50': isSidebarOpen }]">
        <img class="p-2 w-full" src="../assets/logo.png" alt="">
       <div class="flex justify-center">
         <button @click="toggleSidebar" class="md:hidden bg-red-500 rounded-lg px-3 ml-3 text-white">
          CLOSE
-      </button>
+        </button>
       </div>
       <div class="flex-1 p-4 bg-blue-300 mr-0 mt-[54px] overflow-y-auto">
         <UserList :currentUser="username" :currentChatUser="activeConversation" @selectUser="selectUser" @closeSidebar="toggleSidebar" />
-
       </div>
     </div>
+
+
 
     <!-- Main Content -->
     <div class="flex-1 h-full flex flex-col">
@@ -24,15 +27,9 @@
             ☰
           </button>
           <h2 class="text-sm md:text-lg font-bold">
-            <template v-if="activeTab === 'public'">
-              Public Chat Room
-            </template>
-            <template v-else-if="activeTab === 'users'">
-              Online Users
-            </template>
-            <template v-else>
-              Chat with {{ activeConversation }}
-            </template>
+            <span v-if="activeTab === 'public'">Public Chat Room</span>
+            <span v-else-if="activeTab === 'users'">Online Users</span>
+            <span v-else>Chat with {{ activeConversation }}</span>
           </h2>
         </div>
         <button
@@ -43,6 +40,8 @@
           Close Chat
         </button>
       </div>
+
+
 
       <!-- Tabs -->
       <div class="tabs flex p-4 bg-blue-300 border-l-2 border-blue-500">
@@ -64,6 +63,8 @@
         </button>
       </div>
 
+
+
       <!-- Main Content Based on Active Tab -->
       <div class="flex-1 p-6 space-y-4 overflow-y-auto bg-blue-100 border-blue-500 border-l-2 message-container" ref="messageContainer">
         <!-- Public Chat Messages -->
@@ -74,7 +75,7 @@
                 'ml-auto bg-indigo-500 text-white': message.sender === username,
                 'mr-auto bg-indigo-300 text-gray-800': message.sender !== username
               }"
-              class="max-w-xs p-3 rounded-xl shadow-md transition transform hover:scale-105"
+              class="p-3 rounded-xl shadow-md"
             >
               <strong class="block font-semibold">{{ message.sender }}:</strong>
               <p>{{ message.text }}</p>
@@ -86,6 +87,8 @@
             </div>
           </div>
         </div>
+
+
 
         <!-- Private Chat Messages -->
         <div v-else-if="activeTab !== 'users'">
@@ -109,7 +112,9 @@
         </div>
       </div>
 
-      <!-- Input for Sending Messages (only in Chat Tab) -->
+      
+
+      <!-- Input for Sending Messages -->
       <div v-if="activeTab !== 'users'" class="flex items-center p-4 border-l-2 border-blue-500  bg-blue-200">
         <input
           ref="messageInput"
@@ -147,47 +152,45 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick, computed } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import UserList from './UserList.vue';
 
+// Props
 const props = defineProps(['username']);
+
+// Reactive variables
 const messages = ref([]);
 const newMessage = ref('');
 const messageContainer = ref(null);
-const messageInput = ref(null);
-const unsubscribe = ref(null);
-
-const activeTab = ref('public');
-const activeConversation = ref('public');
-const conversations = ref([]);
-const hasUnreadMessages = ref(false);
-
 const isEditing = ref(false);
 const editMessageId = ref(null);
 const editMessageText = ref('');
-
 const isSidebarOpen = ref(false);
+const activeTab = ref('public');
+const activeConversation = ref('public');
+const conversations = ref([]);
 
+// Toggle sidebar visibility
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
+// Handle window resize for sidebar
 window.addEventListener('resize', () => {
   if (window.innerWidth >= 768) {
     isSidebarOpen.value = false;
   }
 });
 
-// Initialize conversations and messages
+// Initialize conversations and messages on mount
 onMounted(() => {
   const savedConversations = JSON.parse(localStorage.getItem('conversations')) || ['public'];
   conversations.value = savedConversations;
   activeConversation.value = savedConversations.includes('public') ? 'public' : savedConversations[0];
   activeTab.value = activeConversation.value;
   fetchMessages(activeConversation.value);
-  monitorUnreadMessages();
 });
 
 // Save conversations to localStorage
@@ -195,14 +198,14 @@ const saveConversations = () => {
   localStorage.setItem('conversations', JSON.stringify(conversations.value));
 };
 
-// Get chat room ID
+// Get chat room ID based on the conversation type
 const getChatRoomId = (conversation) => {
   return conversation === 'public'
     ? 'public_chat'
     : `private_${[props.username, conversation].sort().join('_')}`;
 };
 
-// Unsubscribe from Firestore
+// Unsubscribe from Firestore updates
 const unsubscribeFromMessages = () => {
   if (unsubscribe.value) {
     unsubscribe.value();
@@ -210,7 +213,7 @@ const unsubscribeFromMessages = () => {
   }
 };
 
-// Fetch messages from Firestore
+// Fetch messages for a specific conversation from Firestore
 const fetchMessages = (conversation) => {
   unsubscribeFromMessages();
   messages.value = [];
@@ -227,8 +230,9 @@ const fetchMessages = (conversation) => {
   });
 };
 
-// Watch changes in conversations
+// Watch changes in conversations to save them
 watch(conversations, saveConversations, { deep: true });
+// Watch changes in active conversation to fetch new messages
 watch(activeConversation, (newConversation) => {
   fetchMessages(newConversation);
   activeTab.value = newConversation === 'public' ? 'public' : newConversation;
@@ -267,12 +271,43 @@ const sendMessage = async () => {
 
     newMessage.value = '';
     scrollToBottom();
-
-    // Blur the input field
-    if (messageInput.value) {
-      messageInput.value.blur();
-    }
   }
+};
+
+// Start editing a message
+const startEditing = (message) => {
+  isEditing.value = true;
+  editMessageId.value = message.id;
+  editMessageText.value = message.text;
+};
+
+// Update a message
+const updateMessage = async () => {
+  if (editMessageText.value.trim()) {
+    const chatRoomId = getChatRoomId(activeConversation.value);
+    const messageDocRef = doc(db, chatRoomId, editMessageId.value);
+
+    await updateDoc(messageDocRef, {
+      text: editMessageText.value,
+    });
+
+    cancelEdit();
+  }
+};
+
+// Cancel editing a message
+const cancelEdit = () => {
+  isEditing.value = false;
+  editMessageId.value = null;
+  editMessageText.value = '';
+};
+
+// Delete a message
+const deleteMessage = async (id) => {
+  const chatRoomId = getChatRoomId(activeConversation.value);
+  const messageDocRef = doc(db, chatRoomId, id);
+
+  await deleteDoc(messageDocRef);
 };
 
 // Select a user to start a private chat
@@ -305,63 +340,8 @@ const scrollToBottom = async () => {
   }
 };
 
-// Monitor unread messages
-const monitorUnreadMessages = () => {
-  const q = query(collection(db, 'users'), where('unreadFrom', 'array-contains', props.username));
-  onSnapshot(q, (snapshot) => {
-    hasUnreadMessages.value = !snapshot.empty;
-  });
-};
-
-// Start editing a message
-const startEditing = (message) => {
-  isEditing.value = true;
-  editMessageId.value = message.id;
-  editMessageText.value = message.text;
-};
-
-// Update the edited message
-const updateMessage = async () => {
-  if (editMessageText.value.trim()) {
-    const chatRoomId = getChatRoomId(activeConversation.value);
-    const messageRef = doc(db, chatRoomId, editMessageId.value);
-
-    await updateDoc(messageRef, {
-      text: editMessageText.value,
-    });
-
-    cancelEdit();
-  }
-};
-
-// Cancel editing
-const cancelEdit = () => {
-  isEditing.value = false;
-  editMessageId.value = null;
-  editMessageText.value = '';
-};
-
-// Delete a message
-const deleteMessage = async (messageId) => {
-  const chatRoomId = getChatRoomId(activeConversation.value);
-  const messageRef = doc(db, chatRoomId, messageId);
-
-  await deleteDoc(messageRef);
-};
+// Variable to hold Firestore unsubscribe function
+const unsubscribe = ref(null);
 
 </script>
 
-<style>
-/* Styles for sidebar responsiveness */
-@media (min-width: 768px) {
-  .sidebar {
-    position: relative;
-    top: auto;
-    left: auto;
-    height: auto;
-    width: 16rem;
-    background: transparent;
-    z-index: 0;
-  }
-}
-</style>
