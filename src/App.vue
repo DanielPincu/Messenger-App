@@ -1,10 +1,10 @@
 <template>
   <div id="app" class="w-full md:h-screen bg-blue-100">
     <div v-if="!username" class="flex items-center justify-center h-full">
-      <Login @login="handleLogin" />
+      <LoginSystem @login="handleLogin" />
     </div>
     <div v-else>
-      <div class="header bg-white shadow-md p-4 flex justify-between items-center">
+      <div class="bg-white shadow-md p-4 flex justify-between items-center">
         <h2 class="text-xl font-bold text-gray-800">Welcome, {{ displayName }}</h2>
         <div class="flex items-center space-x-4">
           <button 
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="md:flex gap-4">
-        <Chat 
+        <ChatContainer 
           :username="displayName" 
           :chatWith="chatWith" 
           @switchToPublic="switchToPublic" 
@@ -29,8 +29,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import Login from './components/Login.vue';
-import Chat from './components/Chat.vue';
+import LoginSystem from './components/LoginSystem.vue';
+import ChatContainer from './components/ChatContainer.vue';
 import { doc, updateDoc } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
 import { db } from './firebase';
@@ -114,19 +114,7 @@ onMounted(() => {
   const storedDisplayName = localStorage.getItem('displayName');
   if (storedUsername) {
     username.value = storedUsername;  // Set the stored UID or custom username
-    displayName.value = storedDisplayName   // Set the stored display name, || 'Anonymous';
+    displayName.value = storedDisplayName   // Set the stored display name
   }
 });
 </script>
-
-<style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-button:hover {
-  background-color: #ff6b6b;
-}
-</style>

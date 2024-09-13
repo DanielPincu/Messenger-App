@@ -155,7 +155,7 @@
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import UserList from './UserList.vue';
+import UserList from './OnlineUsers.vue';
 
 // Props
 const props = defineProps(['username']);
