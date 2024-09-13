@@ -40,7 +40,8 @@
         />
         <label for="terms" class="text-sm text-gray-700">
           I read, and I consent to 
-          <a href="#" class="text-blue-600 hover:underline" @click.prevent="showTerms = true">Terms and Conditions</a>
+          <span class="text-blue-600 hover:underline cursor-pointer" @click="showTerms = true"> Terms and Conditions </span>
+
         </label>
       </div>
     </div>
