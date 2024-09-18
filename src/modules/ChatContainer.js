@@ -192,7 +192,6 @@ export function ChatContainer(username) {
     newMessage,
     messageContainer,
     isEditing,
-    editMessageId,
     editMessageText,
     isSidebarOpen,
     activeTab,
@@ -207,6 +206,5 @@ export function ChatContainer(username) {
     selectUser,
     setActiveConversation,
     closeConversation,
-    scrollToBottom,
   };
 }
