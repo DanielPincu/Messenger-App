@@ -10,7 +10,7 @@
 
       <button
         class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700"
-        @click="loginWithUsername"
+        @click="loginWithUsername(emit)"
       >
         Log In
       </button>
@@ -24,7 +24,7 @@
       </div>
       <button
         class="w-full bg-red-600 text-white py-2 rounded-md font-semibold hover:bg-red-700"
-        @click="loginWithGoogle"
+        @click="loginWithGoogle(emit)"
       >
         Log In with Google
       </button>
@@ -64,101 +64,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { db } from '../firebase';
-import termsData from '../assets/terms.json';
-
-const username = ref('');
-const acceptedTerms = ref(false);
-const showTerms = ref(false);
-const errorMessage = ref('');
-const terms = ref(termsData); // Use imported terms data
+import { loginWithUsername, loginWithGoogle, acceptTermsAndClose, disagreeWithTerms, username, acceptedTerms, showTerms, errorMessage, terms } from '../modules/LoginSystem.js';
 
 const emit = defineEmits(['login']);
-
-// Handle the username-based login process
-const loginWithUsername = async () => {
-  errorMessage.value = '';
-
-  if (!username.value.trim()) {
-    errorMessage.value = 'Username cannot be empty.';
-    return;
-  }
-
-  if (!acceptedTerms.value) {
-    errorMessage.value = 'You must accept the Terms and Conditions to log in.';
-    return;
-  }
-
-  try {
-    const sanitizedUsername = username.value.replace(/\s+/g, '_');
-    const randomNum = Math.floor(Math.random() * 1000);
-    const finalUsername = `${sanitizedUsername}${randomNum.toString().padStart(3, '0')}`;
-
-    const userDocRef = doc(db, 'users', finalUsername);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        username: finalUsername,
-        online: true,
-        unreadFrom: '',
-      });
-
-      console.log('User logged in with username:', finalUsername);
-      emit('login', { uid: finalUsername, displayName: finalUsername });
-    } else {
-      errorMessage.value = 'Username already exists. Please choose another one.';
-    }
-  } catch (error) {
-    errorMessage.value = 'Error during login: ' + error.message;
-  }
-};
-
-// Handle Google login process
-const loginWithGoogle = async () => {
-  if (!acceptedTerms.value) {
-    errorMessage.value = 'You must accept the Terms and Conditions to log in.';
-    return;
-  }
-
-  try {
-    const auth = getAuth();
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    console.log('Google login successful:', user.uid);
-
-    const userDisplayName = user.displayName || `user_${user.uid}`;
-    const sanitizedDisplayName = userDisplayName.replace(/\s+/g, '_');
-
-    const userRef = doc(db, 'users', sanitizedDisplayName);
-    await setDoc(userRef, {
-      username: sanitizedDisplayName,
-      email: user.email,
-      online: true,
-      unreadFrom: '',
-    });
-
-    console.log('User data saved to Firestore with displayName as ID:', sanitizedDisplayName);
-    emit('login', { uid: sanitizedDisplayName, displayName: sanitizedDisplayName });
-  } catch (error) {
-    errorMessage.value = 'Error during Google login: ' + error.message;
-  }
-};
-
-// Handle acceptance of terms and conditions
-const acceptTermsAndClose = () => {
-  acceptedTerms.value = true;
-  showTerms.value = false;
-};
-
-// Handle disagreement with terms and conditions
-const disagreeWithTerms = () => {
-  acceptedTerms.value = false;
-  showTerms.value = false;
-};
 </script>

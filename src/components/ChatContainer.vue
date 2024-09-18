@@ -12,7 +12,7 @@
         </button>
       </div>
       <div class="flex-1 p-4 bg-blue-300 mr-0 mt-[54px] overflow-y-auto">
-        <UserList :currentUser="username" :currentChatUser="activeConversation" @selectUser="selectUser" @closeSidebar="toggleSidebar" />
+        <OnlineUsers :currentUser="username" :currentChatUser="activeConversation" @selectUser="selectUser" @closeSidebar="toggleSidebar" />
       </div>
     </div>
 
@@ -155,7 +155,7 @@
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, getDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import UserList from './OnlineUsers.vue';
+import OnlineUsers from './OnlineUsers.vue';
 
 // Props
 const props = defineProps(['username']);
