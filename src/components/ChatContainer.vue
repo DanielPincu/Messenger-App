@@ -151,7 +151,6 @@ const {
   newMessage,
   messageContainer,
   isEditing,
-  editMessageId,
   editMessageText,
   isSidebarOpen,
   activeTab,
@@ -165,7 +164,6 @@ const {
   deleteMessage,
   selectUser,
   setActiveConversation,
-  closeConversation,
-  scrollToBottom,
+  closeConversation
 } = ChatContainer(props.username);
 </script>
