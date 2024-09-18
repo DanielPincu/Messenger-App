@@ -1,6 +1,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from './Firebase';
 
 // Define the props for currentUser and currentChatUser
 export const createOnlineUsers = (props, emit) => {

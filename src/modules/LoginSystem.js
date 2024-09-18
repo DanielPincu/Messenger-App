@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { db } from '../firebase';
+import { db } from './Firebase';
 import termsData from '../assets/terms.json';
 
 export const username = ref(''); // Unified username ref
