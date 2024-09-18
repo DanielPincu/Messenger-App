@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg flex flex-col w-full items-center justify-center min-h-screen bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-md w-96">
       <h1 class="pb-5 text-3xl text-center text-blue-600 font-bold">Log in to Chatognito</h1>
       <input

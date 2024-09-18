@@ -1,4 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
+
+.bg {
+  background-image: url('/bg.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: cover;
+}
+
+h2, h3, li, span, p {
+  font-family: 'Protest Guerrilla', sans-serif;
+}

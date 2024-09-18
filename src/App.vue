@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="w-full md:h-screen bg-blue-100">
+  <div id="app" class="bg w-full h-screen bg-blue-100">
     <div v-if="!username" class="flex items-center justify-center h-full">
       <LoginSystem @login="handleLogin" />
     </div>

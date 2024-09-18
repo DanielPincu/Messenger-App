@@ -1,20 +1,20 @@
 <template>
-  <div class="w-full p-5 bg-blue-200 rounded-xl">
-    <h3 class="text-lg font-semibold text-green-700 text-center mb-4">Online Users</h3>
+  <div class="w-full p-5 border-l-[1px] border-cyan-600 bg-cyan-200 rounded-xl mt-1">
+    <h3 class="text-lg font-semibold text-cyan-800 text-center mb-4">Online Users</h3>
     <ul>
       <li
         v-for="user in filteredUsers"
         :key="user.username"
         @click="selectUser(user)"
         :class="[
-          'p-2 bg-green-100 mb-2 font-bold hover:bg-green-400 duration-200 rounded-md cursor-pointer',
-          shouldHighlightUser(user.username) ? 'text-red-500' : 'text-green-900'
+          'p-2 bg-cyan-400 mb-2 font-bold hover:scale-[102%] duration-200 rounded-md cursor-pointer',
+          shouldHighlightUser(user.username) ? 'bg-orange-400' : 'text-slate-900'
         ]"
         class="flex items-center"
       >
         {{ user.username }}
         <span class="ml-auto">
-          <i class="fas fa-paper-plane text-black"></i>
+          <i class="fas fa-paper-plane text-gray-900"></i>
         </span>
       </li>
     </ul>
