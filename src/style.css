@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,9 +9,11 @@
   background-image: url('/bg.jpg');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: cover;
+    background-position: center;
+
 }
 
 h2, h3, li, span, p {
-  font-family: 'Protest Guerrilla', sans-serif;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
 }

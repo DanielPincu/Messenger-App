@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col md:flex-row container mx-auto mt-10 h-[85vh] w-full bg-cyan-400 shadow-xl border-cyan-600 border-2 rounded-xl overflow-hidden">
+  <div class="flex flex-col md:flex-row container mx-auto mt-10 h-[80vh] w-full bg-cyan-400 shadow-xl border-cyan-600 border-2 rounded-xl overflow-hidden">
 
     <!-- Sidebar for Online Users -->
-    <div :class="['md:flex md:flex-col md:w-64', { 'hidden': !isSidebarOpen, 'absolute top-0 left-0 h-full w-full bg-blue-400 z-50': isSidebarOpen }]">
+    <div :class="['md:flex md:flex-col md:w-64', { 'hidden': !isSidebarOpen, 'absolute top-0 left-0 h-full w-full bg-cyan-400 z-50': isSidebarOpen }]">
       <img class="p-2 w-full" src="../assets/logo.png" alt="">
       <div class="flex justify-center">
         <button @click="toggleSidebar" class="md:hidden bg-red-500 rounded-lg px-3 ml-3 text-white">
