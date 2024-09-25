@@ -90,3 +90,26 @@ const loginWithGoogle = async () => {
 };
 </script>
 
+<style scoped>
+.login-container {
+  max-width: 300px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+
+</style>

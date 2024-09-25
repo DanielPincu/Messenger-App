@@ -66,3 +66,7 @@ const selectUser = async (user) => {
 };
 </script>
 
+
+<style scoped>
+/* Add any necessary styles here */
+</style>
