@@ -74,12 +74,12 @@
               <!-- Check if the message is an image link -->
               <div v-if="isImage(message.text)">
                 <img :src="message.text" class="rounded-md max-w-full h-auto" alt="Image">
-                <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span>
+                <!-- <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span> -->
               </div>
               <!-- Else display the message as text -->
               <div v-else>
                 <p>{{ message.text }}</p>
-                <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span>
+                <!-- <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span> -->
               </div>
             </div>
             <!-- Edit and Delete buttons -->
@@ -186,8 +186,8 @@ const {
   isImage 
 } = ChatContainer(props.username);
 
-const formatTimestamp = (timestamp) => {
-  const date = new Date(timestamp);
-  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-};
+// const formatTimestamp = (timestamp) => {
+//   const date = new Date(timestamp);
+//   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+// };
 </script>
