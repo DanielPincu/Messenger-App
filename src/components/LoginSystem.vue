@@ -1,18 +1,21 @@
 <template>
   <div class="bg flex flex-col w-full items-center justify-center min-h-screen bg-gray-100">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-      <h1 class="pb-5 text-3xl text-center text-blue-600 font-bold">Log in to Chatognito</h1>
+    <div class="w-full flex justify-center bg-cyan-200 bg-opacity-60 my-10">
+      <h1 class="md:text-6xl text-blue-500 py-10">Welcome to Chatognito</h1>
+    </div>
+    <div class="bg-cyan-300 bg-opacity-90 p-8 rounded-lg shadow-md">
+      <h2 class="pb-5 text-3xl text-center text-blue-600 font-bold">Log in to Chatognito</h2>
       <input
         v-model="username"
-        placeholder="Email or Phone Number"
+        placeholder="Enter a nickname and join Chatognito"
         class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
       <button
-        class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700"
+        class="w-full bg-cyan-600 text-white py-2 rounded-md font-semibold hover:bg-cyan-700"
         @click="loginWithUsername(emit)"
       >
-        Log In
+        Log In with Nickname
       </button>
       <div v-if="errorMessage" class="mt-4 text-red-600 text-sm">
         {{ errorMessage }}
@@ -23,7 +26,7 @@
         <hr class="w-full border-gray-300" />
       </div>
       <button
-        class="w-full bg-red-600 text-white py-2 rounded-md font-semibold hover:bg-red-700"
+        class="w-full bg-blue-500 text-white py-2 rounded-md font-semibold hover:bg-blue-600"
         @click="loginWithGoogle(emit)"
       >
         Log In with Google
@@ -49,7 +52,7 @@
     <!-- Terms and Conditions Modal -->
     <div v-if="showTerms" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-white p-8 rounded-lg shadow-lg w-11/12 max-w-3xl max-h-full overflow-y-auto">
-        <h1 class="text-2xl font-bold mb-4">{{ terms.title }}</h1>
+        <h3 class="text-2xl font-bold mb-4">{{ terms.title }}</h3>
         <div v-for="(section, index) in terms.sections" :key="index">
           <h2 class="text-xl font-semibold mt-4">{{ section.heading }}</h2>
           <p>{{ section.content }}</p>

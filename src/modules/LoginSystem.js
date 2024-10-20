@@ -53,7 +53,7 @@ export const loginWithUsername = async (emit) => {
 // Handle Google login process
 export const loginWithGoogle = async (emit) => {
   if (!acceptedTerms.value) {
-    errorMessage.value = 'You must accept the Terms and Conditions to log in.';
+    errorMessage.value = 'You must accept the Terms and Conditions listed below before continuing.';
     return;
   }
 
