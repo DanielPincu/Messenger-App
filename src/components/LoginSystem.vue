@@ -1,10 +1,10 @@
 <template>
   <div class="bg flex flex-col w-full items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full flex justify-center bg-cyan-200 bg-opacity-60 my-10">
-      <h1 class="md:text-6xl text-blue-500 py-10">Welcome to Chatognito</h1>
+    <div class="w-full flex flex-col items-center justify-center bg-cyan-200 bg-opacity-60 my-10">
+      <img class="w-1/2 mb-10" src="/logo.png" alt="">
     </div>
     <div class="bg-cyan-300 bg-opacity-90 p-8 rounded-lg shadow-md">
-      <h2 class="pb-5 text-3xl text-center text-blue-600 font-bold">Log in to Chatognito</h2>
+      <h2 class="pb-5 text-3xl text-center text-blue-600 font-bold">Log in and have fun!</h2>
       <input
         v-model="username"
         placeholder="Enter a nickname and join Chatognito"
