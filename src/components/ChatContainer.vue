@@ -70,7 +70,15 @@
               class="p-3 rounded-xl shadow-md"
             >
               <span class="block font-semibold">{{ message.sender }}:</span>
-              <p>{{ message.text }}</p>
+
+              <!-- Check if the message is an image link -->
+              <div v-if="isImage(message.text)">
+                <img :src="message.text" class="rounded-md max-w-full h-auto" alt="Image">
+              </div>
+              <!-- Else display the message as text -->
+              <div v-else>
+                <p>{{ message.text }}</p>
+              </div>
             </div>
             <!-- Edit and Delete buttons -->
             <div v-if="message.sender === username" class="flex justify-end">
@@ -91,7 +99,15 @@
               class="max-w-xs p-3 rounded-xl shadow-md"
             >
               <span class="block font-semibold">{{ message.sender }}:</span>
-              <p>{{ message.text }}</p>
+
+              <!-- Check if the message is an image link -->
+              <div v-if="isImage(message.text)">
+                <img :src="message.text" class="rounded-md max-w-full h-auto" alt="Image">
+              </div>
+              <!-- Else display the message as text -->
+              <div v-else>
+                <p>{{ message.text }}</p>
+              </div>
             </div>
             <!-- Edit and Delete buttons -->
             <div v-if="message.sender === username" class="flex justify-end">
@@ -143,9 +159,9 @@
 import { ChatContainer } from '../modules/ChatContainer.js';
 import OnlineUsers from './OnlineUsers.vue';
 
-
 const props = defineProps(['username']);
 
+// Use ChatContainer module for all the core chat functionality
 const {
   messages,
   newMessage,
@@ -164,6 +180,7 @@ const {
   deleteMessage,
   selectUser,
   setActiveConversation,
-  closeConversation
+  closeConversation,
+  isImage 
 } = ChatContainer(props.username);
 </script>

@@ -15,6 +15,16 @@ export function ChatContainer(username) {
   const activeConversation = ref('public');
   const conversations = ref([]);
 
+  // Helper function to check if the message contains an image link
+  const isImage = (messageText) => {
+    // Trim the message text to remove any extra whitespace
+    const trimmedMessage = messageText.trim();
+    const imageRegex = /\.(gif|jpg|jpeg|tiff|png)$/i;  
+    const isValidImage = imageRegex.test(trimmedMessage);
+    return isValidImage;
+  };
+  
+
   // Toggle sidebar visibility
   const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
@@ -206,5 +216,6 @@ export function ChatContainer(username) {
     selectUser,
     setActiveConversation,
     closeConversation,
+    isImage 
   };
 }
