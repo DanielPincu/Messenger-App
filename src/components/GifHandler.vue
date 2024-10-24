@@ -42,7 +42,7 @@ const apiKey = 'AIzaSyD6-w8a7rFM2QRG2wGzesuesRkp6CsNKpg';
 const emit = defineEmits(['gifSelected']);
 const searchQuery = ref('');
 const gifs = ref([]);
-const limit = 50; // Number of GIFs to fetch in each request
+const limit = 100; // Number of GIFs to fetch in each request
 const hasMoreGifs = ref(true); // Flag to indicate if there are more GIFs to load
 
 const gifGrid = ref(null); // Reference to the GIF grid element
