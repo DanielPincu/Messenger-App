@@ -121,14 +121,19 @@
       </div>
 
       <!-- Input for Sending Messages -->
-      <div v-if="activeTab !== 'users'" class="flex items-center p-4 border-l-2 rounded-r-lg rounded-t-none border-cyan-600  bg-cyan-300">
+     
+      <div v-if="activeTab !== 'users'" class="flex items-baseline p-4 border-l-2 rounded-r-lg rounded-t-none border-cyan-600  bg-cyan-300">
+        <GifHandler class="hidden md:block" @gifSelected="handleGifSelected" ref="gifHandler" />
         <input
           ref="messageInput"
           v-model="newMessage"
           @keyup.enter="sendMessage"
           placeholder="Type a message..."
-          class="flex-1 px-4 py-2 w-full mr-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-600 transition ease-in-out duration-200"
+          class="flex-1 px-4 py-2 w-1/2 mr-2 rounded-full md:rounded-l-none md:rounded-r-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-600 transition ease-in-out duration-200"
         />
+
+       
+        
         <button
           @click="sendMessage"
           class="fas fa-paper-plane px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-full shadow-lg transition ease-in-out duration-200"
@@ -160,6 +165,7 @@
 <script setup>
 import { ChatContainer } from '../modules/ChatContainer.js';
 import OnlineUsers from './OnlineUsers.vue';
+import GifHandler from './GifHandler.vue';
 
 const props = defineProps(['username']);
 
@@ -185,6 +191,11 @@ const {
   closeConversation,
   isImage 
 } = ChatContainer(props.username);
+
+// Handle the selected GIF
+const handleGifSelected = (gifUrl) => {
+  newMessage.value = gifUrl; 
+};
 
 // const formatTimestamp = (timestamp) => {
 //   const date = new Date(timestamp);
