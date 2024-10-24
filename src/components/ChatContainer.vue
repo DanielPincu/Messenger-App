@@ -73,7 +73,7 @@
 
               <!-- Check if the message is an image link -->
               <div v-if="isImage(message.text)">
-                <img :src="message.text" class="rounded-md max-w-full h-auto" alt="Image">
+                <img :src="message.text" class="rounded-md w-64" alt="Image">
                 <!-- <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span> -->
               </div>
               <!-- Else display the message as text -->
