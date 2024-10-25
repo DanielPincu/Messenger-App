@@ -14,30 +14,25 @@ export function ChatContainer(username) {
   const activeTab = ref('public');
   const activeConversation = ref('public');
   const conversations = ref([]);
+  const unsubscribe = ref(null);
 
   // Helper function to check if the message contains an image link
   const isImage = (messageText) => {
-    // Trim the message text to remove any extra whitespace
     const trimmedMessage = messageText.trim();
     const imageRegex = /\.(gif|jpg|jpeg|tiff|png)$/i;  
-    const isValidImage = imageRegex.test(trimmedMessage);
-    return isValidImage;
+    return imageRegex.test(trimmedMessage);
   };
-  
 
-  // Toggle sidebar visibility
   const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
   };
 
-  // Handle window resize for sidebar
   window.addEventListener('resize', () => {
     if (window.innerWidth >= 768) {
       isSidebarOpen.value = false;
     }
   });
 
-  // Initialize conversations and messages on mount
   onMounted(() => {
     const savedConversations = JSON.parse(localStorage.getItem('conversations')) || ['public'];
     conversations.value = savedConversations;
@@ -46,19 +41,14 @@ export function ChatContainer(username) {
     fetchMessages(activeConversation.value);
   });
 
-  // Save conversations to localStorage
   const saveConversations = () => {
     localStorage.setItem('conversations', JSON.stringify(conversations.value));
   };
 
-  // Get chat room ID based on the conversation type
   const getChatRoomId = (conversation) => {
-    return conversation === 'public'
-      ? 'public_chat'
-      : `private_${[username, conversation].sort().join('_')}`;
+    return conversation === 'public' ? 'public_chat' : `private_${[username, conversation].sort().join('_')}`;
   };
 
-  // Unsubscribe from Firestore updates
   const unsubscribeFromMessages = () => {
     if (unsubscribe.value) {
       unsubscribe.value();
@@ -66,7 +56,24 @@ export function ChatContainer(username) {
     }
   };
 
-  // Fetch messages for a specific conversation from Firestore
+  // Mark messages as seen
+  const markMessagesAsSeen = async (newMessages) => {
+    if (activeConversation.value === 'public') return;
+
+    const unseenMessages = newMessages.filter(
+      (msg) => msg.sender !== username && (!msg.seenBy || !msg.seenBy.includes(username))
+    );
+
+    const chatRoomId = getChatRoomId(activeConversation.value);
+
+    for (const message of unseenMessages) {
+      const messageRef = doc(db, chatRoomId, message.id);
+      await updateDoc(messageRef, {
+        seenBy: [...(message.seenBy || []), username],
+      });
+    }
+  };
+
   const fetchMessages = (conversation) => {
     unsubscribeFromMessages();
     messages.value = [];
@@ -74,25 +81,28 @@ export function ChatContainer(username) {
     const messagesRef = collection(db, chatRoomId);
 
     unsubscribe.value = onSnapshot(query(messagesRef, orderBy('timestamp')), (snapshot) => {
-      messages.value = snapshot.docs.map((doc) => ({
+      const newMessages = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        seenBy: doc.data().seenBy || [], // Ensure seenBy is an array
       }));
 
+      messages.value = newMessages;
       scrollToBottom();
+
+      if (conversation !== 'public') {
+        markMessagesAsSeen(newMessages);
+      }
     });
   };
 
-  // Watch changes in conversations to save them
   watch(conversations, saveConversations, { deep: true });
 
-  // Watch changes in active conversation to fetch new messages
   watch(activeConversation, (newConversation) => {
     fetchMessages(newConversation);
     activeTab.value = newConversation === 'public' ? 'public' : newConversation;
   });
 
-  // Send a new message to Firestore
   const sendMessage = async () => {
     if (newMessage.value.trim()) {
       const chatRoomId = getChatRoomId(activeConversation.value);
@@ -102,6 +112,7 @@ export function ChatContainer(username) {
         text: newMessage.value,
         sender: username,
         timestamp: Date.now(),
+        seenBy: []  // Initialize with an empty array
       });
 
       if (activeConversation.value !== 'public') {
@@ -128,14 +139,12 @@ export function ChatContainer(username) {
     }
   };
 
-  // Start editing a message
   const startEditing = (message) => {
     isEditing.value = true;
     editMessageId.value = message.id;
     editMessageText.value = message.text;
   };
 
-  // Update a message
   const updateMessage = async () => {
     if (editMessageText.value.trim()) {
       const chatRoomId = getChatRoomId(activeConversation.value);
@@ -149,14 +158,12 @@ export function ChatContainer(username) {
     }
   };
 
-  // Cancel editing a message
   const cancelEdit = () => {
     isEditing.value = false;
     editMessageId.value = null;
     editMessageText.value = '';
   };
 
-  // Delete a message
   const deleteMessage = async (id) => {
     const chatRoomId = getChatRoomId(activeConversation.value);
     const messageDocRef = doc(db, chatRoomId, id);
@@ -164,7 +171,6 @@ export function ChatContainer(username) {
     await deleteDoc(messageDocRef);
   };
 
-  // Select a user to start a private chat
   const selectUser = (selectedUser) => {
     if (!conversations.value.includes(selectedUser)) {
       conversations.value.push(selectedUser);
@@ -172,13 +178,11 @@ export function ChatContainer(username) {
     setActiveConversation(selectedUser);
   };
 
-  // Set the active conversation and tab
   const setActiveConversation = (conversation) => {
     activeConversation.value = conversation;
     activeTab.value = conversation;
   };
 
-  // Close a conversation
   const closeConversation = (conversation) => {
     conversations.value = conversations.value.filter(c => c !== conversation);
     if (activeConversation.value === conversation) {
@@ -186,16 +190,12 @@ export function ChatContainer(username) {
     }
   };
 
-  // Scroll to the bottom of the message container
   const scrollToBottom = async () => {
     await nextTick();
     if (messageContainer.value) {
       messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
     }
   };
-
-  // Variable to hold Firestore unsubscribe function
-  const unsubscribe = ref(null);
 
   return {
     messages,

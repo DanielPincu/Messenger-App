@@ -74,15 +74,13 @@
               <!-- Check if the message is an image link -->
               <div v-if="isImage(message.text)">
                 <img :src="message.text" class="rounded-md w-64" alt="Image">
-                <!-- <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span> -->
               </div>
-              <!-- Else display the message as text -->
               <div v-else>
                 <p>{{ message.text }}</p>
-                <!-- <span class="block text-xs text-gray-600">{{ formatTimestamp(message.timestamp) }}</span> -->
               </div>
+
+            
             </div>
-            <!-- Edit and Delete buttons -->
             <div v-if="message.sender === username" class="flex justify-end">
               <button @click="startEditing(message)" class="text-blue-500 hover:text-blue-700 px-2">Edit</button>
               <button @click="deleteMessage(message.id)" class="text-red-500 hover:text-red-700">Delete</button>
@@ -102,17 +100,17 @@
             >
               <span class="block font-semibold">{{ message.sender }}:</span>
 
-              <!-- Check if the message is an image link -->
               <div v-if="isImage(message.text)">
                 <img :src="message.text" class="rounded-md max-w-full h-auto" alt="Image">
               </div>
-              <!-- Else display the message as text -->
               <div v-else>
                 <p>{{ message.text }}</p>
               </div>
             </div>
-            <!-- Edit and Delete buttons -->
-            <div v-if="message.sender === username" class="flex justify-end">
+            <div v-if="message.sender === username" class="flex items-center justify-end">
+              <span v-if="message.sender === username && Array.isArray(message.seenBy) && message.seenBy.includes(activeConversation)" class="text-xs text-cyan-600">
+                Seen <span class="hidden md:inline-block">at {{ new Date(message.timestamp).toLocaleString() }}</span>
+              </span>
               <button @click="startEditing(message)" class="text-cyan-500 hover:text-cyan-500 px-2">Edit</button>
               <button @click="deleteMessage(message.id)" class="text-red-500 hover:text-red-700">Delete</button>
             </div>
@@ -121,8 +119,7 @@
       </div>
 
       <!-- Input for Sending Messages -->
-     
-      <div v-if="activeTab !== 'users'" class="flex items-baseline p-4 border-l-2 rounded-r-lg rounded-t-none border-cyan-600  bg-cyan-300">
+      <div v-if="activeTab !== 'users'" class="flex items-baseline p-4 border-l-2 rounded-r-lg rounded-t-none border-cyan-600 bg-cyan-300">
         <GifHandler class="hidden md:block" @gifSelected="handleGifSelected" ref="gifHandler" />
         <input
           ref="messageInput"
@@ -131,9 +128,6 @@
           placeholder="Type a message..."
           class="flex-1 px-4 py-2 w-1/2 mr-2 rounded-full md:rounded-l-none md:rounded-r-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-600 transition ease-in-out duration-200"
         />
-
-       
-        
         <button
           @click="sendMessage"
           class="fas fa-paper-plane px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-full shadow-lg transition ease-in-out duration-200"
@@ -169,7 +163,6 @@ import GifHandler from './GifHandler.vue';
 
 const props = defineProps(['username']);
 
-// Use ChatContainer module for all the core chat functionality
 const {
   messages,
   newMessage,
@@ -192,13 +185,11 @@ const {
   isImage 
 } = ChatContainer(props.username);
 
-// Handle the selected GIF
 const handleGifSelected = (gifUrl) => {
   newMessage.value = gifUrl; 
 };
-
-// const formatTimestamp = (timestamp) => {
-//   const date = new Date(timestamp);
-//   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-// };
 </script>
+
+<style scoped>
+/* Add any additional styling here */
+</style>
