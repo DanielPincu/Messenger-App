@@ -189,7 +189,3 @@ const handleGifSelected = (gifUrl) => {
   newMessage.value = gifUrl; 
 };
 </script>
-
-<style scoped>
-/* Add any additional styling here */
-</style>

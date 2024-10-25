@@ -97,7 +97,7 @@ const clearGifSearch = () => {
 
 const handleScroll = () => {
   const { scrollTop, scrollHeight, clientHeight } = gifGrid.value;
-  if (scrollTop + clientHeight >= scrollHeight - 50) { // Trigger when close to bottom
+  if (scrollTop + clientHeight >= scrollHeight - 50) { 
     fetchGifs();
   }
 };
