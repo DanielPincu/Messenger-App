@@ -42,18 +42,16 @@ const apiKey = 'AIzaSyD6-w8a7rFM2QRG2wGzesuesRkp6CsNKpg';
 const emit = defineEmits(['gifSelected']);
 const searchQuery = ref('');
 const gifs = ref([]);
-const limit = 100; // Number of GIFs to fetch in each request
-const hasMoreGifs = ref(true); // Flag to indicate if there are more GIFs to load
-
-const gifGrid = ref(null); // Reference to the GIF grid element
-
-
+const offset = ref(0); 
+const limit = 100; 
+const hasMoreGifs = ref(true); 
+const gifGrid = ref(null); 
 
 // Fetch GIFs from Tenor API
 const fetchGifs = async (newOffset = 0) => {
   if (searchQuery.value.trim() === '') {
     gifs.value = [];
-    hasMoreGifs.value = false; // No more GIFs to load if search is empty
+    hasMoreGifs.value = false; 
     return;
   }
 
@@ -74,8 +72,6 @@ const fetchGifs = async (newOffset = 0) => {
   }
 };
 
-
-
 // Select GIF for sending
 const selectGif = (gifUrl) => {
   emit('gifSelected', gifUrl); // Emit the selected GIF URL to the parent component
@@ -85,22 +81,19 @@ const selectGif = (gifUrl) => {
 // Reset GIFs when search input is cleared
 const resetGifs = () => {
   gifs.value = [];
+  offset.value = 0; // Reset offset to 0 when starting a new search
   fetchGifs(); // Fetch GIFs based on new input
 };
-
 
 const clearGifSearch = () => {
   searchQuery.value = ''; // Clear search input
   gifs.value = []; // Clear the GIF results
 };
 
-
 const handleScroll = () => {
   const { scrollTop, scrollHeight, clientHeight } = gifGrid.value;
   if (scrollTop + clientHeight >= scrollHeight - 50) { 
-    fetchGifs();
+    fetchGifs(offset.value); // Pass the current offset value for fetching more GIFs
   }
 };
-
 </script>
-
