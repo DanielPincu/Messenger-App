@@ -38,7 +38,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const apiKey = 'AIzaSyD6-w8a7rFM2QRG2wGzesuesRkp6CsNKpg';
+const apiKey = import.meta.env.VITE_TENOR_API_KEY;
+
 const emit = defineEmits(['gifSelected']);
 const searchQuery = ref('');
 const gifs = ref([]);
